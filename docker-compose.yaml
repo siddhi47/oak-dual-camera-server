@@ -1,0 +1,59 @@
+version: '2.4'
+
+volumes:
+  gt-data:
+services:
+  spatial-tracker:
+    build:
+      context: .
+      dockerfile: Dockerfile.template
+    restart: always
+    privileged: true
+    network_mode: host
+    volumes:
+      - 'gt-data:/output'
+    environment:
+      DISPLAY: $DISPLAY
+      DBUS_SYSTEM_BUS_ADDRESS: 'unix:path=/host/run/dbus/system_bus_socket' # This changes if supervisor version > 17.0.0
+    device_cgroup_rules:
+      - "c 189:* rmw"
+    tty: true
+    labels:
+      io.balena.features.dbus: '1'
+      io.balena.features.balena-socket: '1'
+      io.balena.features.kernel-modules: '1'
+      io.balena.features.sysfs: '1'
+      io.balena.features.supervisor-api: '1'
+  
+  uploader:
+    build:
+      context: .
+      dockerfile: s3_upload/Dockerfile.template
+    restart: always
+    privileged: true
+    network_mode: host
+    volumes:
+      - 'gt-data:/output'
+    environment:
+      DISPLAY: $DISPLAY
+      DBUS_SYSTEM_BUS_ADDRESS: 'unix:path=/host/run/dbus/system_bus_socket'
+      TZ: 'America/Los_Angeles'
+    device_cgroup_rules:
+      - "c 189:* rmw"
+    tty: true
+    labels:
+      io.balena.features.dbus: '1'
+      io.balena.features.balena-socket: '1'
+      io.balena.features.kernel-modules: '1'
+      io.balena.features.sysfs: '1'
+      io.balena.features.supervisor-api: '1'
+
+  wifi-connect:
+    build: ./wifi-connect
+    network_mode: "host"
+    labels:
+      io.balena.features.dbus: '1'
+    cap_add:
+      - NET_ADMIN
+    environment:
+      DBUS_SYSTEM_BUS_ADDRESS: "unix:path=/host/run/dbus/system_bus_socket"

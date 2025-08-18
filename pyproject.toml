@@ -1,0 +1,17 @@
+[project]
+name = "rpi-dual-cam-server"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "siddhi47", email = "siddhi.47.skb@gmail.com" }
+]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+rpi-dual-cam-server = "rpi_dual_cam_server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

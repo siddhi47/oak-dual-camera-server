@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dual OAK Camera Server</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 24px; background: #0b1220; color: #e6edf3; }
+    .wrap { max-width: 980px; margin: 0 auto; }
+    .toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; }
+    button { padding: 10px 14px; border-radius: 12px; border: none; cursor: pointer; font-weight: 600; }
+    .primary { background: #3692ff; color: white; }
+    .danger { background: #ef4444; color: white; }
+    .secondary { background: #1f2937; color: #e6edf3; }
+    .pill { background: #111827; padding: 8px 12px; border-radius: 999px; }
+    img { width: 100%; max-height: 70vh; object-fit: contain; background: #000; border-radius: 16px; }
+    .row { display: flex; gap: 12px; align-items: center; }
+    select { background: #111827; color: #e6edf3; padding: 8px 12px; border-radius: 10px; border: 1px solid #374151; }
+    a { color: #93c5fd; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h2>Dual OAK Camera Server</h2>
+  <div class="toolbar">
+    <button id="btn-record" class="primary">● Start Recording</button>
+    <button id="btn-stop" class="danger" disabled>■ Stop</button>
+    <button id="btn-toggle" class="secondary">Toggle Narrow/Wide</button>
+    <div class="row">
+      <span class="pill">Active: <strong id="active-label">{{ current }}</strong></span>
+      <label for="selector">Switch to:</label>
+      <select id="selector">
+        {% for label in labels %}
+          <option value="{{label}}">{{label}}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <img id="view" src="/stream" alt="Live viewfinder" />
+  <p id="status"></p>
+
+  <p style="opacity:.8; font-size:.9rem; margin-top:12px;">Recordings save under <code>./recordings/</code> on the Pi. If <code>ffmpeg</code> is installed, files are remuxed to <code>.mp4</code>; otherwise the raw <code>.h264</code> is kept.</p>
+</div>
+<script src="/static/main.js"></script>
+</body>
+</html>

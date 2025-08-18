@@ -1,0 +1,16 @@
+FROM balenalib/%%BALENA_ARCH%%-alpine-python
+ENV UDEV=1
+ENV DEBIAN_FRONTEND=noninteractive
+ARG BIT_BUCKET_USERNAME
+ARG BIT_BUCKET_TOKEN
+WORKDIR /app/
+RUN install_packages git gcc  ffmpeg python3-dev tzdata
+RUN pip3 install --upgrade pip
+COPY s3_upload/requirements.txt .
+RUN pip3 install -r requirements.txt
+RUN pip3 cache purge
+
+COPY s3_upload/start.sh .
+COPY s3_upload/s3uploader.py .
+
+CMD /bin/bash start.sh

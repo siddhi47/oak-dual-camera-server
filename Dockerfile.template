@@ -1,0 +1,32 @@
+FROM balenalib/%%BALENA_ARCH%%-debian-python:3.10-bullseye-build as b1
+ENV UDEV=1
+ENV DEBIAN_FRONTEND=noninteractive
+RUN install_packages git gcc python3-dev
+RUN pip3 install --upgrade pip
+COPY . .
+RUN pip3 install .
+RUN pip3 cache purge
+FROM balenalib/%%BALENA_ARCH%%-debian-python:3.10-bullseye-run
+WORKDIR /app/
+ENV UDEV=1
+COPY --from=b1 /usr/local/lib/ /usr/local/lib/
+COPY --from=b1 /lib/ /lib/
+ENV LD_LIBRARY_PATH="/lib/:${LD_LIBRARY_PATH}"
+ENV PATH="/lib/:${PATH}"
+ENV PATH="/usr/local/lib/python3.10/site-packages:${PATH}"
+RUN useradd gt
+RUN echo gt:password123 | chpasswd
+RUN chown -R gt:gt /app
+RUN mkdir /output
+RUN mkdir /output/serial
+RUN mkdir /output/logs
+
+COPY . .
+
+# Expose port
+EXPOSE 8000
+RUN mkdir -p /app/recordings && chmod -R 777 /app/recordings
+
+# Run the app
+CMD ["gunicorn", "-k", "eventlet", "-b", "0.0.0.0:8000", "app:app", "--timeout", "120", "--workers", "1"]
+
