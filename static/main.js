@@ -4,11 +4,13 @@ const btnToggle = document.getElementById('btn-toggle');
 const statusEl = document.getElementById('status');
 const activeEl = document.getElementById('active-label');
 const selector = document.getElementById('selector');
+const btnToggleVideo = document.getElementById('btn-toggle-video');
 
 async function post(url, body) {
   const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : null });
   return res.json();
 }
+
 
 btnRec.onclick = async () => {
   btnRec.disabled = true; btnStop.disabled = false;

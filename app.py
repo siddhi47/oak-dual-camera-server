@@ -23,12 +23,28 @@ def index():
     )
 
 
+stream_enabled = True  # global flag
+
+
+@app.route("/toggle_stream", methods=["POST"])
+def toggle_stream():
+    global stream_enabled
+    # The button POSTs here to turn streaming on/off
+    state = request.form.get("enable")  # expects "true" or "false"
+    stream_enabled = state == "true"
+    return {"stream_enabled": stream_enabled}
+
+
 @app.route("/stream")
 def stream():
     def gen():
         boundary = b"--frame\r\n"
         headers = b"Content-Type: image/jpeg\r\n\r\n"
         while True:
+            if not stream_enabled:
+                yield boundary + headers + b"\r\n"
+                continue  # Skip sending frames if streaming is disabled
+
             frame = cam_mgr.latest_jpeg()
             if frame is not None:
                 yield boundary + headers + frame + b"\r\n"
@@ -59,12 +75,3 @@ def start_record():
 def stop_record():
     path = cam_mgr.stop_recording()
     return jsonify({"status": "stopped", "file": str(path)})
-
-
-if __name__ == "__main__":
-    # Use gevent's WSGIServer for better streaming performance
-    from gevent import pywsgi
-
-    server = pywsgi.WSGIServer(("0.0.0.0", 8000), app)
-    print("Serving on http://0.0.0.0:8000")
-    server.serve_forever()

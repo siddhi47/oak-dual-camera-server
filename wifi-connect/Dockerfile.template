@@ -1,4 +1,5 @@
-FROM debian:bullseye
+FROM balenalib/%%BALENA_ARCH%%-alpine-python
+
 
 RUN apt-get update && apt-get install -y --no-install-recommends dnsmasq wireless-tools
 
@@ -11,27 +12,27 @@ WORKDIR /usr/src/app/ui
 WORKDIR /usr/src/app
 
 RUN \
-    export BASE_URL="https://github.com/balena-os/wifi-connect/releases" &&\    
-    DETECTED_ARCH=$(uname -m) &&\
-    case $DETECTED_ARCH in \
-        "aarch64") \
-            BINARY_ARCH_NAME="aarch64-unknown-linux-gnu" ;; \
-        "x86_64") \
-            BINARY_ARCH_NAME="x86_64-unknown-linux-gnu" ;;\
-        "armv7l") \
-            BINARY_ARCH_NAME="armv7-unknown-linux-gnueabihf" ;;\
-        *) \
-            echo >&2 "error: unsupported architecture ($DETECTED_ARCH)"; exit 1 ;; \ 
-    esac;\
-    if [ ${VERSION} = "latest" ]; then \
-        export URL_PARTIAL="latest/download" ; \
-    else \
-        export URL_PARTIAL="download/${VERSION}" ; \
-    fi; \
-    curl -Ls "$BASE_URL/$URL_PARTIAL/wifi-connect-$BINARY_ARCH_NAME.tar.gz" \
-    | tar -xvz -C  /usr/src/app/ &&\
-    curl -Ls "$BASE_URL/$URL_PARTIAL/wifi-connect-ui.tar.gz" \
-    | tar -xvz -C  /usr/src/app/ui 
+  export BASE_URL="https://github.com/balena-os/wifi-connect/releases" &&\    
+  DETECTED_ARCH=$(uname -m) &&\
+  case $DETECTED_ARCH in \
+  "aarch64") \
+  BINARY_ARCH_NAME="aarch64-unknown-linux-gnu" ;; \
+  "x86_64") \
+  BINARY_ARCH_NAME="x86_64-unknown-linux-gnu" ;;\
+  "armv7l") \
+  BINARY_ARCH_NAME="armv7-unknown-linux-gnueabihf" ;;\
+  *) \
+  echo >&2 "error: unsupported architecture ($DETECTED_ARCH)"; exit 1 ;; \ 
+  esac;\
+  if [ ${VERSION} = "latest" ]; then \
+  export URL_PARTIAL="latest/download" ; \
+  else \
+  export URL_PARTIAL="download/${VERSION}" ; \
+  fi; \
+  curl -Ls "$BASE_URL/$URL_PARTIAL/wifi-connect-$BINARY_ARCH_NAME.tar.gz" \
+  | tar -xvz -C  /usr/src/app/ &&\
+  curl -Ls "$BASE_URL/$URL_PARTIAL/wifi-connect-ui.tar.gz" \
+  | tar -xvz -C  /usr/src/app/ui 
 
 COPY scripts/start.sh .
 

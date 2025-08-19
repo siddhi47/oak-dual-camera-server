@@ -9,7 +9,7 @@ PASSWORD=$(echo -n $DEVICE_NAME | sha256sum | awk '{print substr($1, 0, 15)}')
 export DEVICE_PASSWORD=$PASSWORD
 
 # Get the current hour in 24-hour format
-current_hour=$(date +%H)
+current_hour=$(TZ='America/Los_Angeles'date +%H)
 
 # Check if the current hour is between 20 (8 PM) and 4 (4 AM)
 if [ "$current_hour" -ge 20 ] || [ "$current_hour" -lt 4 ]; then

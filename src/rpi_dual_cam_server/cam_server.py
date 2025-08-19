@@ -163,9 +163,7 @@ class CameraManager:
             self.devices[label].start()
 
         self.current_label = list(mapping.keys())[0]
-        self.out_dir = Path(
-            f"/output/recordings/{str(datetime.date.today())}/{str(datetime.datetime.now().strftime('%H%M%S'))}"
-        )
+        self.out_dir = Path(f"/output/videos/{str(datetime.date.today())}")
 
     def toggle(self):
         labels = list(self.devices.keys())

@@ -26,7 +26,6 @@ COPY . .
 # Expose port
 EXPOSE 8000
 RUN mkdir -p /app/recordings && chmod -R 777 /app/recordings
-
 # Run the app
-CMD ["gunicorn", "-k", "eventlet", "-b", "0.0.0.0:8000", "app:app", "--timeout", "120", "--workers", "1"]
+CMD ["python","-m",   "gunicorn",   "-w", "1", "-k", "gevent",    "--timeout", "0",   "-b", "0.0.0.0:80",   "app:app" ]  
 

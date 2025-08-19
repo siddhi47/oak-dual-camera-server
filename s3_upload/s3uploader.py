@@ -52,7 +52,6 @@ s3 = boto3.client(
     aws_secret_access_key=os.getenv("GT_AWS_SECRET_ACCESS_KEY"),
 )
 
-logger = Logger("s3_uploader").logger
 logger.info("Configuration: {}".format(cfg.to_dict()))
 
 # Iterate through the local files
