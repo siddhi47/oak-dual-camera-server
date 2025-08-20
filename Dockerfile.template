@@ -27,5 +27,5 @@ COPY . .
 EXPOSE 8000
 RUN mkdir -p /app/recordings && chmod -R 777 /app/recordings
 # Run the app
-CMD ["python","-m",   "gunicorn",   "-w", "1", "-k", "gevent",    "--timeout", "0",   "-b", "0.0.0.0:80",   "app:app" ]  
+CMD ["python","-m",   "gunicorn",   "-w", "1", "-k", "gevent",    "--timeout", "30",   "-b", "0.0.0.0:80",   "app:app" ]  
 
