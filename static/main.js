@@ -5,6 +5,8 @@ const statusEl = document.getElementById('status');
 const activeEl = document.getElementById('active-label');
 const selector = document.getElementById('selector');
 const btnToggleVideo = document.getElementById('btn-toggle-video');
+const btnCamStart = document.getElementById('btn-cam-start');
+const btnCamStop = document.getElementById('btn-cam-stop');
 
 async function post(url, body) {
   const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : null });
@@ -22,6 +24,14 @@ btnStop.onclick = async () => {
   btnStop.disabled = true; btnRec.disabled = false;
   const r = await post('/record/stop');
   statusEl.innerHTML = `Stopped. Saved: <a href="${r.file}">${r.file}</a>`;
+};
+
+btnCamStop.onclick = async () => {
+  const r = await post('/camera/stop');
+};
+
+btnCamStart.onclick = async () => {
+  const r = await post('/camera/start');
 };
 
 btnToggle.onclick = async () => {

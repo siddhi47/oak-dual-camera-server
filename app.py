@@ -1,8 +1,5 @@
 from flask import Flask, render_template, Response, jsonify, request
 from rpi_dual_cam_server.cam_server import CameraManager
-import depthai as dai
-import subprocess
-import json
 
 app = Flask(__name__)
 
@@ -33,6 +30,18 @@ def toggle_stream():
     state = request.form.get("enable")  # expects "true" or "false"
     stream_enabled = state == "true"
     return {"stream_enabled": stream_enabled}
+
+
+@app.route("/camera/stop", methods=["POST"])
+def camera_off():
+    _ = cam_mgr.stop_camera()
+    return jsonify({"status": "stopped"})
+
+
+@app.route("/camera/start", methods=["POST"])
+def camera_on():
+    _ = cam_mgr.start_cameras()
+    return jsonify({"status": "started"})
 
 
 @app.route("/stream")

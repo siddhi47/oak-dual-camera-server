@@ -1,5 +1,6 @@
-FROM balenalib/%%BALENA_ARCH%%-alpine-python
+#FROM balenalib/%%BALENA_ARCH%%-alpine-python
 
+FROM debian:bullseye
 
 RUN apt-get update && apt-get install -y --no-install-recommends dnsmasq wireless-tools
 

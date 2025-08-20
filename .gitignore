@@ -10,3 +10,4 @@ wheels/
 .venv
 recordings
 .DS_Store
+output

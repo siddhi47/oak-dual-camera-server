@@ -26,17 +26,9 @@
     <button id="btn-record" class="primary">● Start Recording</button>
     <button id="btn-stop" class="danger" disabled>■ Stop</button>
     <button id="btn-toggle" class="secondary">Toggle Narrow/Wide</button>
-    <button id="btn-video-toggle" class="secondary">Toggle Video</button>
-    <div class="row">
-      <span class="pill">Active: <strong id="active-label">{{ current }}</strong></span>
-      <label for="selector">Switch to:</label>
-      <select id="selector">
-        {% for label in labels %}
-          <option value="{{label}}">{{label}}</option>
-        {% endfor %}
-      </select>
-    </div>
-  </div>
+    <button id="btn-cam-start" class="secondary">Start Cameras</button>
+    <button id="btn-cam-stop" class="secondary">Stop Cameras</button>
+      </div>
 
   <img id="view" src="/stream" alt="Live viewfinder" />
   <p id="status"></p>
