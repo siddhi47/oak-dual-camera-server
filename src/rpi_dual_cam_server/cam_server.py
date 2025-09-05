@@ -6,6 +6,7 @@ from pathlib import Path
 import queue
 import subprocess
 from loguru import logger
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 
 class DevicePipelines:
@@ -20,7 +21,7 @@ class DevicePipelines:
         self,
         mxid: str,
         label: str,
-        preview_fps: int = 15,
+        preview_fps: int = 30,
         preview_size=(640, 360),
         chunk_seconds: int = 300,  # NEW: 5-minute chunks by default
     ):
@@ -54,11 +55,11 @@ class DevicePipelines:
 
         self._thread = threading.Thread(target=self._run, daemon=True)
 
-    def start(self):
+    def start(self) -> None:
         logger.info(f"Starting DevicePipelines for {self.label} ({self.mxid})")
         self._thread.start()
 
-    def stop(self):
+    def stop(self) -> None:
         logger.info(f"Stopping DevicePipelines for {self.label} ({self.mxid})")
         self._stop_evt.set()
         self._thread.join(timeout=5)
@@ -69,17 +70,17 @@ class DevicePipelines:
         self._remux_q.put(None)
         self._remux_thread.join(timeout=5)
 
-    def latest_jpeg(self):
+    def latest_jpeg(self) -> Optional[bytes]:
         with self._lock:
             return self._preview_jpeg_latest
 
-    def is_recording(self):
+    def is_recording(self) -> bool:
         with self._lock:
             return self._recording
 
     # ---- Recording control -------------------------------------------------
 
-    def start_recording(self, out_dir: Path):
+    def start_recording(self, out_dir: Path) -> Optional[Path]:
         """
         Starts a new recording session (list of 5-min chunks).
         Returns the path of the first chunk (.h264 or .mp4 once remuxed).
@@ -93,7 +94,7 @@ class DevicePipelines:
             self._recording = True
         return self._current_chunk_path
 
-    def stop_recording(self):
+    def stop_recording(self) -> List[Path]:
         """
         Stops recording and returns a list of chunk paths (mp4 if remuxed, else h264).
         """
@@ -118,7 +119,7 @@ class DevicePipelines:
 
     # ---- Internals ---------------------------------------------------------
 
-    def _open_new_chunk_locked(self, out_dir: Path):
+    def _open_new_chunk_locked(self, out_dir: Path) -> None:
         """
         Opens a new .h264 file for the next chunk; caller must hold _lock.
         """
@@ -130,7 +131,7 @@ class DevicePipelines:
         # Add now, remux worker may replace with .mp4 by renaming when done
         self._session_chunks.append(h264_path)
 
-    def _roll_chunk_if_needed(self, out_dir: Path):
+    def _roll_chunk_if_needed(self, out_dir: Path) -> None:
         """
         Checks chunk age and rolls over if >= chunk_seconds.
         """
@@ -152,13 +153,13 @@ class DevicePipelines:
                 # Open next chunk immediately
                 self._open_new_chunk_locked(out_dir)
 
-    def _enqueue_remux(self, h264_path: Path):
+    def _enqueue_remux(self, h264_path: Path) -> None:
         """
         Queue a chunk for background remux; if ffmpeg missing, we keep .h264.
         """
         self._remux_q.put(h264_path)
 
-    def _remux_worker(self):
+    def _remux_worker(self) -> None:
         """
         Background thread: h264 -> mp4 (copy). Renames session entry to .mp4 on success.
         """
@@ -203,7 +204,7 @@ class DevicePipelines:
             finally:
                 self._remux_q.task_done()
 
-    def _run(self):
+    def _run(self) -> None:
         pipeline = dai.Pipeline()
 
         cam = pipeline.create(dai.node.ColorCamera)
@@ -292,7 +293,7 @@ class DevicePipelines:
 
 
 class CameraManager:
-    def __init__(self, mapping: dict[str, str]):
+    def __init__(self, mapping: Dict[str, str]):
         """
         mapping: label -> mxid, for example {"narrow": "14442C10C1BE8CD200", "wide": "14442C10C1BE8CDA00"}
         Find mxids using:  python -m depthai
@@ -307,13 +308,13 @@ class CameraManager:
         self.current_label = list(mapping.keys())[0]
         self.out_dir = Path(f"/output/videos/{str(datetime.date.today())}")
 
-    def stop_camera(self):
+    def stop_camera(self) -> None:
         logger.info("stopping all cameras")
         for label, device in self.devices.items():
             self.devices[label].stop()
         logger.info("All cameras stopped")
 
-    def start_cameras(self):
+    def start_cameras(self) -> None:
         logger.info("Starting all cameras")
         for label, mxid in self.mapping.items():
             self.devices[label] = DevicePipelines(mxid=mxid, label=label)
@@ -321,30 +322,30 @@ class CameraManager:
 
         logger.info("All cameras started")
 
-    def toggle(self):
+    def toggle(self) -> str:
         logger.info("Toggling current camera")
         labels = list(self.devices.keys())
         idx = labels.index(self.current_label)
         self.current_label = labels[(idx + 1) % len(labels)]
         return self.current_label
 
-    def set_current(self, label: str):
+    def set_current(self, label: str) -> None:
         logger.info(f"Setting current camera to {label}")
         if label in self.devices:
             self.current_label = label
 
-    def latest_jpeg(self):
+    def latest_jpeg(self) -> Optional[bytes]:
         return self.devices[self.current_label].latest_jpeg()
 
-    def start_recording(self):
+    def start_recording(self) -> Optional[Path]:
         # returns path of the first chunk (will flip to .mp4 after remux completes)
         return self.devices[self.current_label].start_recording(self.out_dir)
 
-    def stop_recording(self):
+    def stop_recording(self) -> List[Path]:
         """
         Returns a list of chunk paths (mp4 if remux succeeded, else h264).
         """
         return self.devices[self.current_label].stop_recording()
 
-    def is_recording(self):
+    def is_recording(self) -> bool:
         return self.devices[self.current_label].is_recording()
